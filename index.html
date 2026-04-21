@@ -38,6 +38,9 @@
 <h3>Log de ejecución</h3>
 <div id="log"></div>
 
+<h3>Sistema BM Cargos (Integrado)</h3>
+<iframe id="bmFrame" src="https://luiso50.github.io/BM-Cargos/BM%20Cargos.html" style="width: 100%; height: 600px; border: 2px solid #333; margin-top: 20px;"></iframe>
+
 <script>
 function log(msg) {
   const logDiv = document.getElementById("log");
@@ -168,52 +171,46 @@ async function startAgent() {
   log("Total de registros: " + data.items.length);
   log("Usando contraseña: " + password);
 
-  // Abre tu sistema en una nueva pestaña
-  winRef = window.open("https://luiso50.github.io/BM-Cargos/BM%20Cargos.html", "_blank");
+  // Obtener referencia al iframe
+  const iframeEl = document.getElementById("bmFrame");
+  
+  // Esperar a que el iframe cargue
+  log("Esperando que cargue BM Cargos (3s)...");
+  await sleep(3000);
 
-  if (!winRef) {
-    log("⚠ El navegador bloqueó la ventana emergente. Permite pop-ups para este sitio.");
-    return;
-  }
-
-  log("Esperando que cargue el sistema (5s)...");
-  await sleep(5000);
-
-  // Intentar interceptar el prompt de forma más agresiva
+  // Intentar acceder y manipular el iframe
   try {
+    const iframeWindow = iframeEl.contentWindow;
+    
+    // Intentar interceptar el prompt ANTES de que ejecute checkPassword
     const injectedScript = `
       (function() {
         const originalPrompt = window.prompt;
-        let promptCalled = false;
-        
         window.prompt = function(msg) {
-          promptCalled = true;
-          console.log("PROMPT INTERCEPTADO:", msg);
-          if (msg && (msg.includes("contraseña") || msg.includes("password") || msg.includes("Contraseña"))) {
+          if (msg && (msg.includes("contraseña") || msg.includes("Contraseña"))) {
+            // Inyectar la contraseña automáticamente
+            document.getElementById("contenido").style.display = "block";
             return "${password}";
           }
           return originalPrompt.call(window, msg);
         };
         
-        // Intentar con Object.defineProperty si lo anterior no funciona
-        Object.defineProperty(window, 'prompt', {
-          value: function(msg) {
-            console.log("PROMPT (defineProperty):", msg);
-            if (msg && (msg.includes("contraseña") || msg.includes("password") || msg.includes("Contraseña"))) {
-              return "${password}";
-            }
-            return originalPrompt.call(window, msg);
-          },
-          writable: true,
-          configurable: true
-        });
+        // Reemplazar checkPassword
+        window.checkPassword = function() {
+          document.getElementById("contenido").style.display = "block";
+        };
+        
+        // Si checkPassword ya se ejecutó, mostrar contenido
+        if (document.getElementById("contenido")) {
+          document.getElementById("contenido").style.display = "block";
+        }
       })();
     `;
     
-    winRef.eval(injectedScript);
-    log("✓ Interceptor de contraseña inyectado");
+    iframeWindow.eval(injectedScript);
+    log("✓ Inyectado interceptor en iframe");
   } catch (e) {
-    log("⚠ No se pudo inyectar automáticamente (cross-origin). Ingresa manualmente: " + password);
+    log("⚠ No se pudo inyectar en iframe (cross-origin). Ingresa la contraseña manualmente en la ventana: " + password);
   }
 
   await sleep(2000);
@@ -249,42 +246,96 @@ function sleep(ms) {
 // =========================
 
 async function inyectarEnSistema(item) {
-  // IMPORTANTE:
-  // Por temas de seguridad del navegador, si el dominio de tu sistema es distinto,
-  // no podrás acceder directamente al DOM (cross-origin).
-  // En un entorno controlado (misma app / mismo dominio) sí podrías hacer algo como:
-
-  /*
-  const doc = winRef.document;
-
-  // Ejemplo genérico: deberás adaptar los selectores a tu sistema real
-  doc.querySelector("input[name='guia']").value = data.guia;
-  doc.querySelector("input[name='consecutivo']").value = item.consecutivo;
-
-  if (item.tipo === "valija") {
-    doc.querySelector("input[name='tipo']").value = "VALIJA";
-    doc.querySelector("input[name='peso']").value = item.peso;
-    doc.querySelector("input[name='warehouse']").value = item.warehouse_qty;
-    doc.querySelector("input[name='iniciales']").value = item.iniciales;
-  } else if (item.tipo === "discontainer") {
-    doc.querySelector("input[name='tipo']").value = "DISCONTAINER";
-    doc.querySelector("input[name='medidas']").value = item.medidas;
-    doc.querySelector("input[name='warehouse']").value = item.warehouse_qty;
-    doc.querySelector("input[name='peso']").value = item.peso;
-    doc.querySelector("input[name='piezas']").value = item.piezas;
-  } else if (item.tipo === "pieza") {
-    doc.querySelector("input[name='tipo']").value = "PIEZA";
-    doc.querySelector("input[name='medidas']").value = item.medidas;
-    doc.querySelector("input[name='warehouse']").value = item.warehouse_qty;
-    doc.querySelector("input[name='peso']").value = item.peso;
+  // Obtener referencia al iframe
+  const iframeEl = document.getElementById("bmFrame");
+  const iframeDoc = iframeEl.contentDocument || iframeEl.contentWindow.document;
+  
+  try {
+    // Intentar llenar el formulario en el iframe
+    
+    // 1. Seleccionar tipo de envase
+    const tipoSelect = iframeDoc.getElementById('tipo');
+    if (tipoSelect) {
+      if (item.tipo === 'valija') {
+        tipoSelect.value = 'valija';
+      } else if (item.tipo === 'discontainer') {
+        tipoSelect.value = 'pallet'; // Mapear discontainer a pallet
+      } else if (item.tipo === 'pieza') {
+        tipoSelect.value = 'piezas';
+      }
+      tipoSelect.dispatchEvent(new Event('change'));
+    }
+    
+    // 2. Llenar guía
+    const guiaInput = iframeDoc.getElementById('guia');
+    if (guiaInput) {
+      guiaInput.value = item.guia || '810-5066-0000';
+    }
+    
+    // 3. Según el tipo, llenar los campos correspondientes
+    if (item.tipo === 'valija') {
+      const numValijaInput = iframeDoc.querySelector('input[name="numValija"]');
+      const pesoInput = iframeDoc.querySelector('input[name="pesoValija"]');
+      const warehouseInput = iframeDoc.querySelector('input[name="warehouse"]');
+      const inicialesInput = iframeDoc.getElementById('inicialesValija');
+      
+      if (numValijaInput) numValijaInput.value = item.consecutivo;
+      if (pesoInput) pesoInput.value = item.peso;
+      if (warehouseInput) warehouseInput.value = item.warehouse_qty;
+      if (inicialesInput) inicialesInput.value = item.iniciales;
+      
+      log("→ Valija: " + item.consecutivo);
+      
+    } else if (item.tipo === 'discontainer') {
+      const numPalletInput = iframeDoc.querySelector('input[name="numPallet"]');
+      const pesoInput = iframeDoc.querySelector('input[name="peso"]');
+      const largInput = iframeDoc.querySelector('input[name="largo"]');
+      const anchInput = iframeDoc.querySelector('input[name="ancho"]');
+      const alturaInput = iframeDoc.querySelector('input[name="altura"]');
+      const warehouseInput = iframeDoc.querySelector('input[name="warehouse_pallet"]');
+      
+      if (numPalletInput) numPalletInput.value = item.consecutivo;
+      if (pesoInput) pesoInput.value = item.peso;
+      
+      // Parsear medidas "58x42x45"
+      const [largo, ancho, altura] = item.medidas.split('x');
+      if (largInput) largInput.value = largo;
+      if (anchInput) anchInput.value = ancho;
+      if (alturaInput) alturaInput.value = altura;
+      if (warehouseInput) warehouseInput.value = item.warehouse_qty;
+      
+      log("→ Discontainer: " + item.consecutivo + " (medidas: " + item.medidas + ")");
+      
+    } else if (item.tipo === 'pieza') {
+      const numPalletInput = iframeDoc.querySelector('input[name="numPallet"]');
+      const pesoInput = iframeDoc.querySelector('input[name="peso"]');
+      const largInput = iframeDoc.querySelector('input[name="largo"]');
+      const anchInput = iframeDoc.querySelector('input[name="ancho"]');
+      const alturaInput = iframeDoc.querySelector('input[name="altura"]');
+      const warehouseInput = iframeDoc.querySelector('input[name="warehouse_pallet"]');
+      
+      if (numPalletInput) numPalletInput.value = item.consecutivo;
+      if (pesoInput) pesoInput.value = item.peso;
+      
+      // Parsear medidas "85x20x8"
+      const [largo, ancho, altura] = item.medidas.split('x');
+      if (largInput) largInput.value = largo;
+      if (anchInput) anchInput.value = ancho;
+      if (alturaInput) alturaInput.value = altura;
+      if (warehouseInput) warehouseInput.value = item.warehouse_qty;
+      
+      log("→ Pieza: " + item.consecutivo + " (medidas: " + item.medidas + ")");
+    }
+    
+    // 4. Hacer clic en enviar (si es posible)
+    const submitBtn = iframeDoc.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.click();
+    }
+    
+  } catch (e) {
+    log("⚠ Error al inyectar en iframe: " + e.message);
   }
-
-  // Simular click en "Agregar" o "Guardar"
-  doc.querySelector("button#btnAgregar").click();
-  */
-
-  // Como esto puede no ser accesible por cross-origin, aquí solo logueamos la intención:
-  log("→ (simulado) Enviar a sistema: " + JSON.stringify(item));
 }
 </script>
 
