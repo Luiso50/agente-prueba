@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Agente BM Cargo</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+  h1, h2, h3 { margin-top: 0; }
+  #log { background: #000; color: #0f0; padding: 10px; height: 320px; overflow-y: auto; font-size: 13px; }
+  button { padding: 10px 18px; font-size: 15px; margin-right: 8px; cursor: pointer; }
+  .status { margin: 10px 0; font-size: 14px; }
+  .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: #333; color: #fff; }
+</style>
+</head>
+<body>
+
+<h2>Agente Automático BM Cargo</h2>
+<p>
+  Este agente toma un dataset predefinido (guía <strong>810-5066-0000</strong>) y recorre todos los registros
+  (valijas, discontainer y piezas) para que puedas automatizar el llenado en tu sistema web.
+</p>
+
+<div class="status">
+  <span class="badge">Guía fija:</span> 810-5066-0000<br>
+  <span class="badge">Total registros:</span> <span id="totalItems">0</span>
+</div>
+
+<button onclick="startAgent()">Iniciar agente</button>
+<button onclick="pauseAgent()">Pausar</button>
+<button onclick="resumeAgent()">Reanudar</button>
+
+<h3>Log de ejecución</h3>
+<div id="log"></div>
+
+<script>
+function log(msg) {
+  const logDiv = document.getElementById("log");
+  const time = new Date().toLocaleTimeString();
+  logDiv.innerHTML += "[" + time + "] " + msg + "<br>";
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// =========================
+// DATASET JSON
+// =========================
+
+const data = {
+  "guia": "810-5066-0000",
+  "items": [
+    /* 40 VALIJAS: consecutivo 1340000–1340039 */
+    { "tipo": "valija", "consecutivo": 1340000, "peso": 25, "warehouse_qty": 10, "iniciales": "LO" },
+    { "tipo": "valija", "consecutivo": 1340001, "peso": 26, "warehouse_qty": 11, "iniciales": "MM" },
+    { "tipo": "valija", "consecutivo": 1340002, "peso": 27, "warehouse_qty": 12, "iniciales": "FT" },
+    { "tipo": "valija", "consecutivo": 1340003, "peso": 28, "warehouse_qty": 13, "iniciales": "PD" },
+    { "tipo": "valija", "consecutivo": 1340004, "peso": 29, "warehouse_qty": 14, "iniciales": "YF" },
+    { "tipo": "valija", "consecutivo": 1340005, "peso": 30, "warehouse_qty": 15, "iniciales": "AF" },
+    { "tipo": "valija", "consecutivo": 1340006, "peso": 25, "warehouse_qty": 16, "iniciales": "LO" },
+    { "tipo": "valija", "consecutivo": 1340007, "peso": 26, "warehouse_qty": 17, "iniciales": "MM" },
+    { "tipo": "valija", "consecutivo": 1340008, "peso": 27, "warehouse_qty": 18, "iniciales": "FT" },
+    { "tipo": "valija", "consecutivo": 1340009, "peso": 28, "warehouse_qty": 19, "iniciales": "PD" },
+    { "tipo": "valija", "consecutivo": 1340010, "peso": 29, "warehouse_qty": 20, "iniciales": "YF" },
+    { "tipo": "valija", "consecutivo": 1340011, "peso": 30, "warehouse_qty": 10, "iniciales": "AF" },
+    { "tipo": "valija", "consecutivo": 1340012, "peso": 25, "warehouse_qty": 11, "iniciales": "LO" },
+    { "tipo": "valija", "consecutivo": 1340013, "peso": 26, "warehouse_qty": 12, "iniciales": "MM" },
+    { "tipo": "valija", "consecutivo": 1340014, "peso": 27, "warehouse_qty": 13, "iniciales": "FT" },
+    { "tipo": "valija", "consecutivo": 1340015, "peso": 28, "warehouse_qty": 14, "iniciales": "PD" },
+    { "tipo": "valija", "consecutivo": 1340016, "peso": 29, "warehouse_qty": 15, "iniciales": "YF" },
+    { "tipo": "valija", "consecutivo": 1340017, "peso": 30, "warehouse_qty": 16, "iniciales": "AF" },
+    { "tipo": "valija", "consecutivo": 1340018, "peso": 25, "warehouse_qty": 17, "iniciales": "LO" },
+    { "tipo": "valija", "consecutivo": 1340019, "peso": 26, "warehouse_qty": 18, "iniciales": "MM" },
+    { "tipo": "valija", "consecutivo": 1340020, "peso": 27, "warehouse_qty": 19, "iniciales": "FT" },
+    { "tipo": "valija", "consecutivo": 1340021, "peso": 28, "warehouse_qty": 20, "iniciales": "PD" },
+    { "tipo": "valija", "consecutivo": 1340022, "peso": 29, "warehouse_qty": 10, "iniciales": "YF" },
+    { "tipo": "valija", "consecutivo": 1340023, "peso": 30, "warehouse_qty": 11, "iniciales": "AF" },
+    { "tipo": "valija", "consecutivo": 1340024, "peso": 25, "warehouse_qty": 12, "iniciales": "LO" },
+    { "tipo": "valija", "consecutivo": 1340025, "peso": 26, "warehouse_qty": 13, "iniciales": "MM" },
+    { "tipo": "valija", "consecutivo": 1340026, "peso": 27, "warehouse_qty": 14, "iniciales": "FT" },
+    { "tipo": "valija", "consecutivo": 1340027, "peso": 28, "warehouse_qty": 15, "iniciales": "PD" },
+    { "tipo": "valija", "consecutivo": 1340028, "peso": 29, "warehouse_qty": 16, "iniciales": "YF" },
+    { "tipo": "valija", "consecutivo": 1340029, "peso": 30, "warehouse_qty": 17, "iniciales": "AF" },
+    { "tipo": "valija", "consecutivo": 1340030, "peso": 25, "warehouse_qty": 18, "iniciales": "LO" },
+    { "tipo": "valija", "consecutivo": 1340031, "peso": 26, "warehouse_qty": 19, "iniciales": "MM" },
+    { "tipo": "valija", "consecutivo": 1340032, "peso": 27, "warehouse_qty": 20, "iniciales": "FT" },
+    { "tipo": "valija", "consecutivo": 1340033, "peso": 28, "warehouse_qty": 10, "iniciales": "PD" },
+    { "tipo": "valija", "consecutivo": 1340034, "peso": 29, "warehouse_qty": 11, "iniciales": "YF" },
+    { "tipo": "valija", "consecutivo": 1340035, "peso": 30, "warehouse_qty": 12, "iniciales": "AF" },
+    { "tipo": "valija", "consecutivo": 1340036, "peso": 25, "warehouse_qty": 13, "iniciales": "LO" },
+    { "tipo": "valija", "consecutivo": 1340037, "peso": 26, "warehouse_qty": 14, "iniciales": "MM" },
+    { "tipo": "valija", "consecutivo": 1340038, "peso": 27, "warehouse_qty": 15, "iniciales": "FT" },
+    { "tipo": "valija", "consecutivo": 1340039, "peso": 28, "warehouse_qty": 16, "iniciales": "PD" },
+
+    /* 20 DISCONTAINER: consecutivo 1340040–1340059, medidas 58x42x45 */
+    { "tipo": "discontainer", "consecutivo": 1340040, "medidas": "58x42x45", "warehouse_qty": 150, "peso": 200, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340041, "medidas": "58x42x45", "warehouse_qty": 160, "peso": 201, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340042, "medidas": "58x42x45", "warehouse_qty": 170, "peso": 202, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340043, "medidas": "58x42x45", "warehouse_qty": 180, "peso": 203, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340044, "medidas": "58x42x45", "warehouse_qty": 190, "peso": 204, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340045, "medidas": "58x42x45", "warehouse_qty": 200, "peso": 205, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340046, "medidas": "58x42x45", "warehouse_qty": 210, "peso": 206, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340047, "medidas": "58x42x45", "warehouse_qty": 220, "peso": 207, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340048, "medidas": "58x42x45", "warehouse_qty": 230, "peso": 208, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340049, "medidas": "58x42x45", "warehouse_qty": 240, "peso": 209, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340050, "medidas": "58x42x45", "warehouse_qty": 250, "peso": 210, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340051, "medidas": "58x42x45", "warehouse_qty": 260, "peso": 211, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340052, "medidas": "58x42x45", "warehouse_qty": 270, "peso": 212, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340053, "medidas": "58x42x45", "warehouse_qty": 280, "peso": 213, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340054, "medidas": "58x42x45", "warehouse_qty": 290, "peso": 214, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340055, "medidas": "58x42x45", "warehouse_qty": 300, "peso": 215, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340056, "medidas": "58x42x45", "warehouse_qty": 320, "peso": 216, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340057, "medidas": "58x42x45", "warehouse_qty": 340, "peso": 217, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340058, "medidas": "58x42x45", "warehouse_qty": 360, "peso": 218, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340059, "medidas": "58x42x45", "warehouse_qty": 380, "peso": 219, "piezas": 1 },
+
+    /* 20 PIEZAS: consecutivo 1340060–1340079, medidas 85x20x8 */
+    { "tipo": "pieza", "consecutivo": 1340060, "medidas": "85x20x8", "warehouse_qty": 150, "peso": 200 },
+    { "tipo": "pieza", "consecutivo": 1340061, "medidas": "85x20x8", "warehouse_qty": 165, "peso": 205 },
+    { "tipo": "pieza", "consecutivo": 1340062, "medidas": "85x20x8", "warehouse_qty": 180, "peso": 210 },
+    { "tipo": "pieza", "consecutivo": 1340063, "medidas": "85x20x8", "warehouse_qty": 195, "peso": 215 },
+    { "tipo": "pieza", "consecutivo": 1340064, "medidas": "85x20x8", "warehouse_qty": 210, "peso": 220 },
+    { "tipo": "pieza", "consecutivo": 1340065, "medidas": "85x20x8", "warehouse_qty": 225, "peso": 225 },
+    { "tipo": "pieza", "consecutivo": 1340066, "medidas": "85x20x8", "warehouse_qty": 240, "peso": 230 },
+    { "tipo": "pieza", "consecutivo": 1340067, "medidas": "85x20x8", "warehouse_qty": 255, "peso": 235 },
+    { "tipo": "pieza", "consecutivo": 1340068, "medidas": "85x20x8", "warehouse_qty": 270, "peso": 240 },
+    { "tipo": "pieza", "consecutivo": 1340069, "medidas": "85x20x8", "warehouse_qty": 285, "peso": 245 },
+    { "tipo": "pieza", "consecutivo": 1340070, "medidas": "85x20x8", "warehouse_qty": 300, "peso": 250 },
+    { "tipo": "pieza", "consecutivo": 1340071, "medidas": "85x20x8", "warehouse_qty": 315, "peso": 255 },
+    { "tipo": "pieza", "consecutivo": 1340072, "medidas": "85x20x8", "warehouse_qty": 330, "peso": 260 },
+    { "tipo": "pieza", "consecutivo": 1340073, "medidas": "85x20x8", "warehouse_qty": 345, "peso": 265 },
+    { "tipo": "pieza", "consecutivo": 1340074, "medidas": "85x20x8", "warehouse_qty": 360, "peso": 270 },
+    { "tipo": "pieza", "consecutivo": 1340075, "medidas": "85x20x8", "warehouse_qty": 375, "peso": 275 },
+    { "tipo": "pieza", "consecutivo": 1340076, "medidas": "85x20x8", "warehouse_qty": 390, "peso": 280 },
+    { "tipo": "pieza", "consecutivo": 1340077, "medidas": "85x20x8", "warehouse_qty": 405, "peso": 285 },
+    { "tipo": "pieza", "consecutivo": 1340078, "medidas": "85x20x8", "warehouse_qty": 420, "peso": 290 },
+    { "tipo": "pieza", "consecutivo": 1340079, "medidas": "85x20x8", "warehouse_qty": 435, "peso": 295 }
+  ]
+};
+
+document.getElementById("totalItems").textContent = data.items.length;
+
+// =========================
+// LÓGICA DEL AGENTE
+// =========================
+
+let paused = false;
+let currentIndex = 0;
+let winRef = null;
+
+function pauseAgent() {
+  paused = true;
+  log("Agente en pausa.");
+}
+
+function resumeAgent() {
+  if (!paused) return;
+  paused = false;
+  log("Reanudando agente...");
+}
+
+async function startAgent() {
+  log("Iniciando agente para guía " + data.guia);
+  log("Total de registros: " + data.items.length);
+
+  // Abre tu sistema en una nueva pestaña
+  // ⚠ CAMBIA ESTA URL POR LA DE TU SISTEMA REAL
+  winRef = window.open("https://TU-SISTEMA-AQUI.com", "_blank");
+
+  if (!winRef) {
+    log("⚠ El navegador bloqueó la ventana emergente. Permite pop-ups para este sitio.");
+    return;
+  }
+
+  log("Esperando que cargue el sistema (5s)...");
+  await sleep(5000);
+
+  for (currentIndex = 0; currentIndex < data.items.length; currentIndex++) {
+    const item = data.items[currentIndex];
+
+    // Manejo de pausa
+    while (paused) {
+      await sleep(500);
+    }
+
+    log("Procesando consecutivo " + item.consecutivo + " (" + item.tipo + ")");
+
+    try {
+      await inyectarEnSistema(item);
+    } catch (e) {
+      log("❌ Error al procesar " + item.consecutivo + ": " + e.message);
+    }
+
+    await sleep(800); // pequeño delay entre registros
+  }
+
+  log("✔ Agente completó todos los registros.");
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+// =========================
+// FUNCIÓN DE INYECCIÓN
+// =========================
+
+async function inyectarEnSistema(item) {
+  // IMPORTANTE:
+  // Por temas de seguridad del navegador, si el dominio de tu sistema es distinto,
+  // no podrás acceder directamente al DOM (cross-origin).
+  // En un entorno controlado (misma app / mismo dominio) sí podrías hacer algo como:
+
+  /*
+  const doc = winRef.document;
+
+  // Ejemplo genérico: deberás adaptar los selectores a tu sistema real
+  doc.querySelector("input[name='guia']").value = data.guia;
+  doc.querySelector("input[name='consecutivo']").value = item.consecutivo;
+
+  if (item.tipo === "valija") {
+    doc.querySelector("input[name='tipo']").value = "VALIJA";
+    doc.querySelector("input[name='peso']").value = item.peso;
+    doc.querySelector("input[name='warehouse']").value = item.warehouse_qty;
+    doc.querySelector("input[name='iniciales']").value = item.iniciales;
+  } else if (item.tipo === "discontainer") {
+    doc.querySelector("input[name='tipo']").value = "DISCONTAINER";
+    doc.querySelector("input[name='medidas']").value = item.medidas;
+    doc.querySelector("input[name='warehouse']").value = item.warehouse_qty;
+    doc.querySelector("input[name='peso']").value = item.peso;
+    doc.querySelector("input[name='piezas']").value = item.piezas;
+  } else if (item.tipo === "pieza") {
+    doc.querySelector("input[name='tipo']").value = "PIEZA";
+    doc.querySelector("input[name='medidas']").value = item.medidas;
+    doc.querySelector("input[name='warehouse']").value = item.warehouse_qty;
+    doc.querySelector("input[name='peso']").value = item.peso;
+  }
+
+  // Simular click en "Agregar" o "Guardar"
+  doc.querySelector("button#btnAgregar").click();
+  */
+
+  // Como esto puede no ser accesible por cross-origin, aquí solo logueamos la intención:
+  log("→ (simulado) Enviar a sistema: " + JSON.stringify(item));
+}
+</script>
+
+</body>
+</html>
