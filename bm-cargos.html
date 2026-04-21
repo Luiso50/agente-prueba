@@ -851,6 +851,16 @@
   </div>
   <script>
     function checkPassword() {
+      // Verificar si está en modo automático (desde el agente)
+      const urlParams = new URLSearchParams(window.location.search);
+      const autoLogin = urlParams.get('auto_login');
+      
+      if (autoLogin === 'true') {
+        // Saltar login automáticamente
+        document.getElementById("contenido").style.display = "block";
+        return;
+      }
+      
       var password = prompt("Por favor, ingrese la contraseña para acceder:", "");
       if (password === "BMCARGOS") {
         document.getElementById("contenido").style.display = "block";
