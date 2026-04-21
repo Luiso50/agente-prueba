@@ -23,7 +23,12 @@
 <div class="status">
   <span class="badge">Guía fija:</span> 810-5066-0000<br>
   <span class="badge">Total registros:</span> <span id="totalItems">0</span><br>
-  <span class="badge">Contraseña:</span> <strong>BMCARGOS</strong>
+  <span class="badge">Contraseña por defecto:</span> <strong>BMCARGOS</strong>
+</div>
+
+<div style="margin: 15px 0; padding: 10px; background: #f0f0f0; border-radius: 4px;">
+  <label for="pwdInput" style="font-weight: bold;">Contraseña del sistema:</label><br>
+  <input type="password" id="pwdInput" value="BMCARGOS" style="padding: 5px; margin: 5px 0; width: 200px; font-size: 14px;">
 </div>
 
 <button onclick="startAgent()">Iniciar agente</button>
@@ -158,8 +163,10 @@ function resumeAgent() {
 }
 
 async function startAgent() {
+  const password = document.getElementById("pwdInput").value;
   log("Iniciando agente para guía " + data.guia);
   log("Total de registros: " + data.items.length);
+  log("Usando contraseña: " + password);
 
   // Abre tu sistema en una nueva pestaña
   winRef = window.open("https://luiso50.github.io/BM-Cargos/BM%20Cargos.html", "_blank");
@@ -172,23 +179,41 @@ async function startAgent() {
   log("Esperando que cargue el sistema (5s)...");
   await sleep(5000);
 
-  // Intentar inyectar script que maneje el prompt automáticamente
+  // Intentar interceptar el prompt de forma más agresiva
   try {
-    const script = `
+    const injectedScript = `
       (function() {
         const originalPrompt = window.prompt;
+        let promptCalled = false;
+        
         window.prompt = function(msg) {
-          if (msg && msg.includes("contraseña") || msg && msg.includes("password")) {
-            return "BMCARGOS";
+          promptCalled = true;
+          console.log("PROMPT INTERCEPTADO:", msg);
+          if (msg && (msg.includes("contraseña") || msg.includes("password") || msg.includes("Contraseña"))) {
+            return "${password}";
           }
-          return originalPrompt(msg);
+          return originalPrompt.call(window, msg);
         };
+        
+        // Intentar con Object.defineProperty si lo anterior no funciona
+        Object.defineProperty(window, 'prompt', {
+          value: function(msg) {
+            console.log("PROMPT (defineProperty):", msg);
+            if (msg && (msg.includes("contraseña") || msg.includes("password") || msg.includes("Contraseña"))) {
+              return "${password}";
+            }
+            return originalPrompt.call(window, msg);
+          },
+          writable: true,
+          configurable: true
+        });
       })();
     `;
-    winRef.eval(script);
-    log("✓ Inyectado manejador de contraseña");
+    
+    winRef.eval(injectedScript);
+    log("✓ Interceptor de contraseña inyectado");
   } catch (e) {
-    log("⚠ No se pudo inyectar contraseña automática (cross-origin). Ingresa manualmente: BMCARGOS");
+    log("⚠ No se pudo inyectar automáticamente (cross-origin). Ingresa manualmente: " + password);
   }
 
   await sleep(2000);
