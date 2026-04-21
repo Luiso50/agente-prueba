@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulario de Envíos</title>
+  <link rel="icon" href="Imagen1.jpg" type="image/jpeg">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f9;
+      background: #eef2f7;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .main-container {
+      display: flex;
+      gap: 20px; /* Espacio entre los botones y el formulario */
+      align-items: flex-start;
+    }
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .btn-square {
+      width: 60px;
+      height: 60px;
+      background: #0078d7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+    .btn-square:hover {
+      background: #005a9e;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      padding: 30px;
+      width: 500px; /* Ancho ampliado */
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.15);
+    }
+    h2 {
+      margin-top: 0;
+      color: #0078d7;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+    .inline-fields {
+      display: flex;
+      gap: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    input:focus, select:focus {
+      border-color: #0078d7;
+      outline: none;
+      box-shadow: 0 0 4px rgba(0,120,215,0.3);
+    }
+    .hidden {
+      display: none;
+    }
+    button[type="submit"] {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background: #0078d7;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button[type="submit"]:hover {
+      background: #005a9e;
+    }
+    .resumen {
+      margin-top: 25px;
+      padding: 15px;
+      background: #f9fafc;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .resumen h3 {
+      margin-top: 0;
+      color: #444;
+    }
+    #iniciales, #inicialesValija {
+      text-transform: uppercase;
+    }
+  </style>
+  <script src="logo_data.js"></script>
+</head>
+<body>
+  <div id="contenido" style="display: none;">
+  <div class="main-container">
+    <div class="button-container">
+      <button class="btn-square" onclick="modificarRegistro()" title="Modificar Registro">MR</button>
+      <button class="btn-square" onclick="borrarRegistro()" title="Borrar Registro">BR</button>
+      <button class="btn-square" onclick="buscarGuia()" title="Buscar Guía">BG</button>
+      <button class="btn-square" onclick="modificarGuia()" title="Modificar Guía">MG</button>
+      <button class="btn-square" onclick="eliminarGuia()" title="Eliminar Guía">EG</button>
+      <button class="btn-square" onclick="exportarDatos()" title="Exportar Datos">ED</button>
+      <button class="btn-square" onclick="importarDatos()" title="Importar Datos">ID</button>
+    </div>
+    <div class="card">
+      <h2>Formulario de Envíos</h2>
+      <form id="formEnvio">
+        <label for="guia">No. de Guía</label>
+        <input type="text" id="guia" name="guia" required>
+
+        <label for="tipo">Tipo de Envase</label>
+        <select id="tipo" name="tipo" required>
+          <option value="">Seleccione...</option>
+          <option value="valija">Valija</option>
+          <option value="pallet">Pallet</option>
+          <option value="dcontainer">D Container</option>
+          <option value="uld">U. L. D.</option>
+          <option value="piezas">Piezas</option>
+        </select>
+
+        <!-- Campos Valija -->
+        <div id="valijaFields" class="hidden">
+          <label for="numValija">Número de Valija</label>
+          <input type="text" id="numValija" name="numValija">
+
+          <label for="pesoValija">Peso (kg)</label>
+          <input type="number" id="pesoValija" name="pesoValija" step="0.01" min="0">
+
+          <label for="sello">Número de Sello</label>
+          <input type="text" id="sello" name="sello">
+
+          <label for="warehouse">Cantidad de Warehouse</label>
+          <input type="number" id="warehouse" name="warehouse" min="0">
+
+          <label for="inicialesValija">Iniciales (2 letras)</label>
+          <input type="text" id="inicialesValija" name="inicialesValija" maxlength="2">
+        </div>
+
+        <!-- Campos Pallet / Piezas -->
+        <div id="palletPiezasFields" class="hidden">
+          <label for="numPallet">Número de Pallet</label>
+          <input type="text" id="numPallet" name="numPallet">
+
+          <label for="peso">Peso (kg)</label>
+          <input type="number" id="peso" name="peso" step="0.01" min="0" style="width: 100%;">
+
+         <div class="inline-fields">
+            <div><label for="largo">Largo (in)</label>
+            <input type="number" id="largo" name="largo" min="0" style="width: 90px;"></div>
+
+            <div><label for="ancho">Ancho (in)</label>
+            <input type="number" id="ancho" name="ancho" min="0" style="width: 90px;"></div>
+
+           <div> <label for="altura">Altura (in)</label>
+            <input type="number" id="altura" name="altura" min="0" style="width: 90px;"></div>
+          </div>
+
+          <label for="warehouse_pallet">Cantidad de Warehouse</label>
+          <input type="number" id="warehouse_pallet" name="warehouse_pallet" min="0">
+
+          <label for="iniciales">Iniciales (2 letras)</label>
+          <input type="text" id="iniciales" name="iniciales" maxlength="2">
+        </div>
+
+        <button type="submit">Enviar</button>
+      </form>
+
+      <div id="resumen-container" class="resumen hidden">
+        <div id="resumen"></div>
+        <button id="generarPdfBtn" class="hidden">Generar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Librerías para generar PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    const tipoSelect = document.getElementById('tipo');
+    const valijaFields = document.getElementById('valijaFields');
+    const palletPiezasFields = document.getElementById('palletPiezasFields');
+    const form = document.getElementById('formEnvio');
+    const resumenDiv = document.getElementById('resumen');
+    const resumenContainer = document.getElementById('resumen-container');
+    const generarPdfBtn = document.getElementById('generarPdfBtn');
+    const guiaInput = document.getElementById('guia');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    let envios = {};
+    let indiceItemEnEdicion = null; // Para saber qué item estamos editando
+
+    const logoBM = "data:image/jpeg;base64,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";
+
+    // Funciones para los nuevos botones
+    function modificarRegistro() {
+      const guia = guiaInput.value.trim();
+      if (!guia || !envios[guia] || envios[guia].length === 0) {
+        alert("No hay registros en la guía actual para modificar.");
+        return;
+      }
+
+      const itemNum = prompt("Ingrese el número de envío que desea modificar:");
+      if (!itemNum) return;
+
+      const indice = envios[guia].findIndex(item => item.numPallet === itemNum || item.numValija === itemNum);
+
+      if (indice === -1) {
+        alert("No se encontró ningún item con ese número en la guía actual.");
+        return;
+      }
+
+      indiceItemEnEdicion = indice;
+      const item = envios[guia][indice];
+
+      // Cargar datos en el formulario
+      form.reset(); // Limpiar formulario antes de cargar
+      guiaInput.value = guia; // Restaurar el número de guía
+
+      for (const key in item) {
+        if (form.elements[key]) {
+          form.elements[key].value = item[key];
+        }
+      }
+      
+      // Mostrar los campos correctos según el tipo
+      tipoSelect.dispatchEvent(new Event('change'));
+      
+      submitButton.textContent = 'Actualizar'; // Cambiar texto del botón
+      window.scrollTo(0, 0); // Subir al inicio del formulario
+    }
+
+    function borrarRegistro() {
+      const guia = guiaInput.value.trim();
+      if (!guia || !envios[guia] || envios[guia].length === 0) {
+        alert("No hay registros en la guía actual para borrar.");
+        return;
+      }
+
+      const itemNum = prompt("Ingrese el número de envío que desea borrar:");
+      if (!itemNum) return;
+
+      const indice = envios[guia].findIndex(item => item.numPallet === itemNum || item.numValija === itemNum);
+
+      if (indice === -1) {
+        alert("No se encontró ningún item con ese número en la guía actual.");
+        return;
+      }
+
+      const itemParaBorrar = envios[guia][indice];
+      const confirmacion = confirm(`¿Está seguro de que desea borrar el item "${itemParaBorrar.numPallet || itemParaBorrar.numValija}"?`);
+
+      if (confirmacion) {
+        envios[guia].splice(indice, 1);
+        actualizarResumen(guia);
+        saveData();
+        alert("Registro borrado exitosamente.");
+      }
+    }
+
+    function buscarGuia() {
+      const guiasGuardadas = Object.keys(envios);
+      if (guiasGuardadas.length === 0) {
+        alert("No hay guías guardadas para buscar.");
+        return;
+      }
+
+      const ultimasDiez = guiasGuardadas.slice(-10).reverse();
+      const mensaje = "Últimas 10 guías guardadas:\n\n" + ultimasDiez.join("\n") + "\n\nIngrese el número de la guía que desea cargar:";
+
+      const guiaSeleccionada = prompt(mensaje);
+
+      if (guiaSeleccionada && envios[guiaSeleccionada]) {
+        guiaInput.value = guiaSeleccionada;
+        // Disparar el evento 'input' para que se actualice el resumen
+        guiaInput.dispatchEvent(new Event('input'));
+      } else if (guiaSeleccionada) {
+        alert("El número de guía ingresado no existe.");
+      }
+    }
+
+    function eliminarGuia() {
+      const guiaAEliminar = prompt("Ingrese el número de la guía que desea eliminar por completo:");
+
+      if (!guiaAEliminar) return;
+
+      if (envios[guiaAEliminar]) {
+        const confirmacion = confirm(`¿Está seguro de que desea eliminar permanentemente la guía "${guiaAEliminar}" y todos sus registros? Esta acción no se puede deshacer.`);
+
+        if (confirmacion) {
+          delete envios[guiaAEliminar];
+          saveData();
+
+          // Si la guía eliminada era la que se estaba mostrando, limpiar la vista
+          if (guiaInput.value === guiaAEliminar) {
+            form.reset();
+            resumenDiv.innerHTML = '';
+            resumenContainer.classList.add('hidden');
+          }
+
+          alert(`La guía "${guiaAEliminar}" ha sido eliminada.`);
+        }
+      } else {
+        alert("No se encontró ninguna guía con ese número.");
+      }
+    }
+
+    function modificarGuia() {
+      const guiaActual = prompt("Ingrese el número de la guía que desea modificar:");
+      if (!guiaActual || !envios[guiaActual]) {
+        alert("La guía ingresada no existe.");
+        return;
+      }
+
+      const nuevaGuia = prompt(`Ingrese el nuevo número para la guía "${guiaActual}":`);
+      if (!nuevaGuia) return;
+
+      if (envios[nuevaGuia]) {
+        alert(`La guía "${nuevaGuia}" ya existe. Por favor, elija un número de guía diferente.`);
+        return;
+      }
+
+      // Renombrar la clave
+      envios[nuevaGuia] = envios[guiaActual];
+      delete envios[guiaActual];
+
+      // Actualizar el número de guía dentro de cada objeto de envío
+      envios[nuevaGuia].forEach(envio => {
+        envio.guia = nuevaGuia;
+      });
+
+      saveData();
+      alert(`La guía "${guiaActual}" ha sido renombrada a "${nuevaGuia}".`);
+
+      // Actualizar la interfaz
+      guiaInput.value = nuevaGuia;
+      actualizarResumen(nuevaGuia);
+    }
+
+    function saveData() {
+      localStorage.setItem('enviosData', JSON.stringify(envios));
+    }
+
+    function loadData() {
+      const data = localStorage.getItem('enviosData');
+      if (data) {
+        envios = JSON.parse(data);
+        const lastGuia = Object.keys(envios).pop();
+        if(lastGuia){
+            guiaInput.value = lastGuia;
+            actualizarResumen(lastGuia);
+            resumenContainer.classList.remove('hidden');
+        }
+      }
+    }
+
+    window.addEventListener('load', loadData);
+
+    function generarPDF() {
+      const guia = guiaInput.value.trim();
+      if (!guia || !envios[guia] || envios[guia].length === 0) {
+        alert("No hay datos en la guía actual para generar un informe.");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageHeight = doc.internal.pageSize.height;
+      let finalY = 0;
+
+      // --- 1. ENCABEZADO --- 
+      function agregarEncabezado(doc, titulo = "CONTROL DE VALIJAS") {
+        doc.addImage(logoBM, 'JPEG', 14, 15, 20, 20);
+        doc.setFont('Arial', 'bold');
+        doc.setFontSize(16);
+        doc.text("ATALLAH BUSINES GROUP INC", doc.internal.pageSize.width / 2, 20, { align: 'center' });
+
+        doc.setFont('Arial', 'normal');
+        doc.setFontSize(10);
+        doc.text("8400 NW 25 TH STREET SUIT 100 MIAMI FL 33198", doc.internal.pageSize.width / 2, 27, { align: 'center' });
+        
+        doc.setFont('Arial', 'bold');
+        doc.setFontSize(12);
+        doc.text(titulo, doc.internal.pageSize.width / 2, 35, { align: 'center' });
+
+        doc.setFont('Arial', 'normal');
+        doc.setFontSize(10);
+        const fecha = new Date().toLocaleDateString();
+        doc.text(`AWB #: ${guia}`, 14, 45);
+        doc.text(fecha, doc.internal.pageSize.width - 14, 45, { align: 'right' });
+      }
+
+      agregarEncabezado(doc, "CONTROL DE VALIJAS");
+
+      // --- 2. PÁGINA DE VALIJAS ---
+      const valijas = envios[guia].filter(e => e.tipo === 'valija').sort((a, b) => {
+        return (a.numValija || '').localeCompare(b.numValija || '', undefined, { numeric: true });
+      });
+
+      if (valijas.length > 0) {
+        const tableColumn = ["#", "# Pieza", "Cant Warehouse", "No Sello"];
+        const rowsLeft = [];
+        const rowsRight = [];
+
+        for (let i = 0; i < 25; i++) {
+          const valija = valijas[i];
+          rowsLeft.push([ i + 1, valija?.numValija || '', valija?.warehouse || '', valija?.sello || '' ]);
+        }
+        for (let i = 25; i < 50; i++) {
+          const valija = valijas[i];
+          rowsRight.push([ i + 1, valija?.numValija || '', valija?.warehouse || '', valija?.sello || '' ]);
+        }
+
+        doc.autoTable(tableColumn, rowsLeft, {
+          startY: 55,
+          theme: 'grid',
+          headStyles: { fillColor: [0, 123, 255], textColor: 255, fontStyle: 'bold' },
+          styles: { font: 'Arial', fontSize: 9, cellPadding: 2 },
+          margin: { right: doc.internal.pageSize.width / 2 + 2 }
+        });
+
+        doc.autoTable(tableColumn, rowsRight, {
+          startY: 55,
+          theme: 'grid',
+          headStyles: { fillColor: [0, 123, 255], textColor: 255, fontStyle: 'bold' },
+          styles: { font: 'Arial', fontSize: 9, cellPadding: 2 },
+          margin: { left: doc.internal.pageSize.width / 2 + 2 }
+        });
+
+        finalY = doc.lastAutoTable.finalY > finalY ? doc.lastAutoTable.finalY : finalY;
+      }
+
+      // --- 3. PÁGINA DE TODOS LOS ENVÍOS ---
+      const todosLosEnvios = [...envios[guia]].sort((a, b) => {
+        const itemA = a.numPallet || a.numValija || 'Z';
+        const itemB = b.numPallet || b.numValija || 'Z';
+        return itemA.localeCompare(itemB, undefined, { numeric: true });
+      });
+
+      if (todosLosEnvios.length > 0) {
+        doc.addPage();
+        agregarEncabezado(doc, "LOCALIZACION CARGA EXPRESS Y PRIORITY");
+        
+        const tableColumn = ["#", "No. Envio", "Descripcion", "Largo", "Ancho", "Alto", "Volumen", "Peso", "Inicial"];
+        const tableRows = [];
+
+        todosLosEnvios.forEach((envio, index) => {
+            const volumen = (envio.altura && envio.ancho && envio.largo)
+                ? Math.floor((parseFloat(envio.altura) * parseFloat(envio.ancho) * parseFloat(envio.largo)) / 366)
+                : '';
+
+            const rowData = [
+                index + 1,
+                envio.numPallet || envio.numValija || '',
+                envio.tipo || '',
+                envio.largo || '',
+                envio.ancho || '',
+                envio.altura || '',
+                volumen,
+                envio.peso || envio.pesoValija || '',
+                envio.iniciales || envio.inicialesValija || ''
+            ];
+            tableRows.push(rowData);
+        });
+
+        doc.autoTable(tableColumn, tableRows, {
+          startY: 55,
+          theme: 'grid',
+          headStyles: { fillColor: [0, 123, 255], textColor: 255, fontStyle: 'bold' },
+          styles: { font: 'Arial', fontSize: 9 }
+        });
+        finalY = doc.lastAutoTable.finalY;
+      }
+
+      // --- 4. PÁGINA DE RESUMEN ---
+      doc.addPage();
+      agregarEncabezado(doc, "BM CARGOS WAREHOUSE");
+      doc.setFontSize(10);
+      doc.text("(305) 593 5383", doc.internal.pageSize.width / 2, 40, { align: 'center' });
+
+      // --- UN-3481 Box ---
+      const boxWidth = 40;
+      const boxHeight = 10;
+      const boxX = doc.internal.pageSize.width - boxWidth - 14; // 14 is the right margin
+      const boxY = 48; // Below the header
+
+      doc.setDrawColor(0);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(boxX, boxY, boxWidth, boxHeight, 'FD'); // Fill and Stroke
+
+      doc.setFont('Times-Roman', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text('UN-3481', boxX + boxWidth / 2, boxY + boxHeight / 2 + 1, { align: 'center', baseline: 'middle' });
+
+      // Reset font for the rest of the document
+      doc.setFont('Arial', 'normal');
+      doc.setFontSize(10);
+      // --- End UN-3481 Box ---
+
+      // --- Totals Calculation ---
+      let totalPeso = 0, totalValijas = 0, totalPallets = 0, totalPiezas = 0, totalDContainers = 0, totalULDs = 0, totalVolumen = 0, totalWarehouse = 0;
+      for (const envio of envios[guia]) {
+        totalPeso += parseFloat(envio.peso || envio.pesoValija || 0);
+        if (envio.tipo === 'valija') totalValijas++;
+        else if (envio.tipo === 'pallet') totalPallets++;
+        else if (envio.tipo === 'piezas') totalPiezas++;
+        else if (envio.tipo === 'dcontainer') totalDContainers++;
+        else if (envio.tipo === 'uld') totalULDs++;
+        if (envio.altura && envio.ancho && envio.largo) {
+            const vol = Math.floor((parseFloat(envio.altura) * parseFloat(envio.ancho) * parseFloat(envio.largo)) / 366);
+            totalVolumen += vol;
+        }
+        totalWarehouse += parseInt(envio.warehouse || envio.warehouse_pallet || 0, 10);
+      }
+      const totalPaquetes = envios[guia].length;
+
+      // --- New Summary Layout ---
+      const startY = 70;
+      const startX = 14;
+      const valueX = 100;
+      const lineSpacing = 13; // Increased line spacing
+      let currentY = startY;
+
+      function drawUnderlinedText(doc, text, x, y) {
+          const textString = String(text);
+          const textWidth = doc.getTextWidth(textString);
+          doc.text(textString, x, y);
+          doc.line(x, y + 1, x + textWidth, y + 1);
+      }
+
+      doc.setFont('Arial', 'bold');
+      doc.setFontSize(15);
+
+      doc.text("D Container", startX, currentY);
+      drawUnderlinedText(doc, String(totalDContainers), valueX, currentY);
+      currentY += lineSpacing;
+
+      doc.text("U.L.D.", startX, currentY);
+      drawUnderlinedText(doc, String(totalULDs), valueX, currentY);
+      doc.text("SEAL", valueX + 40, currentY);
+      drawUnderlinedText(doc, "0", valueX + 60, currentY);
+      currentY += lineSpacing;
+
+      doc.text("PALLET", startX, currentY);
+      drawUnderlinedText(doc, String(totalPallets), valueX, currentY);
+      currentY += lineSpacing;
+
+      doc.text("PCS", startX, currentY);
+      drawUnderlinedText(doc, String(totalPiezas), valueX, currentY);
+      currentY += lineSpacing;
+
+      doc.text("BAGS", startX, currentY);
+      drawUnderlinedText(doc, String(totalValijas), valueX, currentY);
+      currentY += lineSpacing;
+      
+      doc.text("CREATE", startX, currentY);
+      drawUnderlinedText(doc, "0", valueX, currentY);
+      currentY += lineSpacing;
+
+      doc.text("TOTAL", startX, currentY);
+      drawUnderlinedText(doc, String(totalPaquetes), valueX, currentY);
+      
+      currentY += lineSpacing * 1.8; // Extra space
+
+      doc.text("PESO TOTAL", startX, currentY);
+      drawUnderlinedText(doc, Math.floor(totalPeso) + " kg", valueX, currentY);
+      currentY += lineSpacing;
+
+      doc.text("VOLUMEN TOTAL", startX, currentY);
+      drawUnderlinedText(doc, String(totalVolumen) + " kg", valueX, currentY);
+      currentY += lineSpacing;
+
+      doc.text("TOTAL WR", startX, currentY);
+      drawUnderlinedText(doc, String(totalWarehouse), valueX, currentY);
+
+      // --- 5. PÁGINA DE RESUMEN POR INICIALES ---
+      doc.addPage();
+      agregarEncabezado(doc, "RESUMEN POR INICIALES");
+      doc.setFontSize(10);
+      doc.text("(305) 593 5383", doc.internal.pageSize.width / 2, 40, { align: 'center' });
+
+      // Agrupar envíos por iniciales
+      const resumenPorIniciales = {};
+      for (const envio of envios[guia]) {
+        const iniciales = (envio.iniciales || envio.inicialesValija || 'S/N').toUpperCase();
+        if (!resumenPorIniciales[iniciales]) {
+          resumenPorIniciales[iniciales] = {
+            cantidad: 0,
+            warehouse: 0,
+            peso: 0
+          };
+        }
+        resumenPorIniciales[iniciales].cantidad += 1;
+        resumenPorIniciales[iniciales].warehouse += parseInt(envio.warehouse || envio.warehouse_pallet || 0, 10);
+        resumenPorIniciales[iniciales].peso += parseFloat(envio.peso || envio.pesoValija || 0);
+      }
+
+      // Convertir a array y ordenar por iniciales
+      const filasResumen = Object.keys(resumenPorIniciales).sort().map(iniciales => [
+        iniciales,
+        resumenPorIniciales[iniciales].cantidad,
+        resumenPorIniciales[iniciales].warehouse,
+        resumenPorIniciales[iniciales].peso.toFixed(2) + ' kg'
+      ]);
+
+      // Agregar fila de totales
+      filasResumen.push([
+        'TOTAL',
+        totalPaquetes,
+        totalWarehouse,
+        totalPeso.toFixed(2) + ' kg'
+      ]);
+
+      doc.autoTable({
+        startY: 55,
+        head: [['Iniciales', 'Cant. Envíos', 'Cant. Warehouse', 'Peso Total']],
+        body: filasResumen,
+        theme: 'grid',
+        headStyles: { fillColor: [0, 123, 255], textColor: 255, fontStyle: 'bold' },
+        styles: { font: 'Arial', fontSize: 10, cellPadding: 3 },
+        columnStyles: {
+          0: { fontStyle: 'bold' },
+          3: { halign: 'right' }
+        }
+      });
+
+      // --- SAVE PDF ---
+      doc.save(`Informe-Guia-${guia}.pdf`);
+    }
+
+    function actualizarResumen(guia) {
+      if (!guia || !envios[guia] || envios[guia].length === 0) {
+        resumenDiv.innerHTML = '';
+        generarPdfBtn.classList.add('hidden');
+        resumenContainer.classList.add('hidden');
+        return;
+      };
+
+      let totalPeso = 0, totalPallets = 0, totalValijas = 0, totalPiezas = 0, totalDContainers = 0, totalULDs = 0, totalVolumen = 0, totalWarehouse = 0;
+
+      for (const envio of envios[guia]) {
+        if (envio.tipo === 'valija' && envio.pesoValija) totalPeso += parseFloat(envio.pesoValija);
+        else if (['pallet', 'piezas', 'dcontainer', 'uld'].includes(envio.tipo) && envio.peso) totalPeso += parseFloat(envio.peso);
+
+        if (envio.tipo === 'valija') totalValijas++;
+        else if (envio.tipo === 'pallet') totalPallets++;
+        else if (envio.tipo === 'piezas') totalPiezas++;
+        else if (envio.tipo === 'dcontainer') totalDContainers++;
+        else if (envio.tipo === 'uld') totalULDs++;
+
+        if (['pallet', 'piezas', 'dcontainer', 'uld'].includes(envio.tipo) && envio.altura && envio.ancho && envio.largo) {
+          const alto = parseFloat(envio.altura), ancho = parseFloat(envio.ancho), largo = parseFloat(envio.largo);
+          if (alto > 0 && ancho > 0 && largo > 0) totalVolumen += Math.floor((alto * ancho * largo) / 366);
+        }
+
+        totalWarehouse += parseInt(envio.warehouse, 10) || 0;
+        totalWarehouse += parseInt(envio.warehouse_pallet, 10) || 0;
+      }
+
+      resumenDiv.innerHTML = `
+        <h3>Resumen para Guía: ${guia}</h3>
+        <ul>
+          <li><b>Peso Total:</b> ${totalPeso.toFixed(2)} kg</li>
+          <li><b>Cantidad de Pallets:</b> ${totalPallets}</li>
+          <li><b>Cantidad de Valijas:</b> ${totalValijas}</li>
+          <li><b>Cantidad de Piezas:</b> ${totalPiezas}</li>
+          <li><b>Cantidad de D Containers:</b> ${totalDContainers}</li>
+          <li><b>Cantidad de U.L.D.s:</b> ${totalULDs}</li>
+          <li><b>Volumen Total:</b> ${totalVolumen}</li>
+          <li><b>Cantidad Total de Warehouse:</b> ${totalWarehouse}</li>
+        </ul>
+      `;
+      generarPdfBtn.classList.remove('hidden');
+      resumenContainer.classList.remove('hidden');
+    }
+
+    tipoSelect.addEventListener('change', () => {
+      const selectedType = tipoSelect.value;
+      valijaFields.classList.toggle('hidden', selectedType !== 'valija');
+      palletPiezasFields.classList.toggle('hidden', !['pallet', 'piezas', 'dcontainer', 'uld'].includes(selectedType));
+    });
+
+    guiaInput.addEventListener('input', (e) => {
+        const guia = e.target.value.trim();
+        resumenContainer.classList.toggle('hidden', !guia);
+        indiceItemEnEdicion = null; // Resetear modo edición al cambiar de guía
+        submitButton.textContent = 'Enviar';
+        if(guia){
+            actualizarResumen(guia);
+        } else {
+            resumenDiv.innerHTML = '';
+            generarPdfBtn.classList.add('hidden');
+        }
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      let inicialesInput;
+      if (tipoSelect.value === 'valija') {
+        inicialesInput = document.getElementById('inicialesValija');
+      } else if (['pallet', 'piezas', 'dcontainer', 'uld'].includes(tipoSelect.value)) {
+        inicialesInput = document.getElementById('iniciales');
+      }
+
+      if (inicialesInput) {
+        const inicialesValue = inicialesInput.value.trim().toUpperCase();
+        if (!/^[A-Z]{2}$/.test(inicialesValue)) {
+          alert("Las iniciales deben ser exactamente 2 letras mayúsculas.");
+          inicialesInput.focus();
+          return;
+        }
+        inicialesInput.value = inicialesValue;
+      }
+
+      const formData = new FormData(form);
+      const envio = Object.fromEntries(formData.entries());
+      const guia = envio.guia;
+
+      if (indiceItemEnEdicion !== null) {
+        // MODO EDICIÓN: Actualizar el item existente
+        envios[guia][indiceItemEnEdicion] = envio;
+      } else {
+        // MODO CREACIÓN: Validar y agregar nuevo item
+        const numeroEnvio = envio.numPallet || envio.numValija;
+        if (numeroEnvio && envios[guia]) {
+          const esDuplicado = envios[guia].some(item => item.numPallet === numeroEnvio || item.numValija === numeroEnvio);
+          if (esDuplicado) {
+            alert(`Error: El número de envío '${numeroEnvio}' ya existe en esta guía.`);
+            return; // Detener el proceso
+          }
+        }
+
+        if (!envios[guia]) {
+          envios[guia] = [];
+        }
+        envios[guia].push(envio);
+      }
+
+      actualizarResumen(guia);
+      saveData();
+
+      // Resetear estado de edición y formulario
+      indiceItemEnEdicion = null;
+      submitButton.textContent = 'Enviar';
+      const guiaValue = guiaInput.value;
+      form.reset();
+      guiaInput.value = guiaValue;
+
+      valijaFields.classList.add('hidden');
+      palletPiezasFields.classList.add('hidden');
+      resumenContainer.classList.remove('hidden');
+    });
+
+    generarPdfBtn.addEventListener('click', generarPDF);
+
+    // --- FUNCIONES DE IMPORTAR Y EXPORTAR ---
+
+    function exportarDatos() {
+      if (Object.keys(envios).length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+      }
+
+      const dataStr = JSON.stringify(envios, null, 2);
+      const dataBlob = new Blob([dataStr], {type: "application/json"});
+      const url = URL.createObjectURL(dataBlob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'datos_envios.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      alert("Los datos se han exportado en el archivo 'datos_envios.json'.");
+    }
+
+    function importarDatos() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = readerEvent => {
+          try {
+            const content = readerEvent.target.result;
+            const datosImportados = JSON.parse(content);
+            
+            const confirmacion = confirm("¿Está seguro de que desea importar los datos?\nSe borrarán todos los datos actuales y se reemplazarán por los del archivo.");
+            
+            if (confirmacion) {
+              envios = datosImportados;
+              saveData(); // Guardar en localStorage
+              alert("¡Datos importados con éxito!");
+              // Recargar la vista para reflejar los datos importados
+              const lastGuia = Object.keys(envios).pop();
+              if (lastGuia) {
+                  guiaInput.value = lastGuia;
+                  actualizarResumen(lastGuia);
+                  resumenContainer.classList.remove('hidden');
+              } else {
+                  form.reset();
+                  resumenDiv.innerHTML = '';
+                  resumenContainer.classList.add('hidden');
+              }
+            }
+          } catch (error) {
+            alert("Error al leer el archivo. Asegúrese de que sea un archivo JSON válido exportado desde esta aplicación.");
+          }
+        };
+        reader.readAsText(file);
+      };
+
+      input.click();
+    }
+  </script>
+  </div>
+  <script>
+    function checkPassword() {
+      var password = prompt("Por favor, ingrese la contraseña para acceder:", "");
+      if (password === "BMCARGOS") {
+        document.getElementById("contenido").style.display = "block";
+      } else {
+        alert("Contraseña incorrecta.");
+        checkPassword();
+      }
+    }
+    window.onload = checkPassword;
+  </script>
+</body>
+</html>

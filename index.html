@@ -39,7 +39,7 @@
 <div id="log"></div>
 
 <h3>Sistema BM Cargos (Integrado)</h3>
-<iframe id="bmFrame" src="https://luiso50.github.io/BM-Cargos/BM%20Cargos.html" style="width: 100%; height: 600px; border: 2px solid #333; margin-top: 20px;"></iframe>
+<iframe id="bmFrame" src="bm-cargos.html" style="width: 100%; height: 600px; border: 2px solid #333; margin-top: 20px;"></iframe>
 
 <script>
 function log(msg) {
@@ -175,45 +175,55 @@ async function startAgent() {
   const iframeEl = document.getElementById("bmFrame");
   
   // Esperar a que el iframe cargue
-  log("Esperando que cargue BM Cargos (3s)...");
-  await sleep(3000);
+  log("Esperando que cargue BM Cargos (2s)...");
+  await sleep(2000);
 
-  // Intentar acceder y manipular el iframe
+  // Inyectar script en el iframe para desactivar la pantalla de login
   try {
     const iframeWindow = iframeEl.contentWindow;
+    const iframeDoc = iframeEl.contentDocument;
     
-    // Intentar interceptar el prompt ANTES de que ejecute checkPassword
     const injectedScript = `
       (function() {
+        // Reemplazar la función checkPassword para saltarla
+        window.checkPassword = function() {
+          const contenido = document.getElementById("contenido");
+          if (contenido) {
+            contenido.style.display = "block";
+          }
+          console.log("Pantalla de login desactivada por agente");
+        };
+        
+        // Modificar el prompt si aún se llama
         const originalPrompt = window.prompt;
         window.prompt = function(msg) {
           if (msg && (msg.includes("contraseña") || msg.includes("Contraseña"))) {
-            // Inyectar la contraseña automáticamente
-            document.getElementById("contenido").style.display = "block";
+            const contenido = document.getElementById("contenido");
+            if (contenido) {
+              contenido.style.display = "block";
+            }
             return "${password}";
           }
           return originalPrompt.call(window, msg);
         };
         
-        // Reemplazar checkPassword
-        window.checkPassword = function() {
-          document.getElementById("contenido").style.display = "block";
-        };
-        
-        // Si checkPassword ya se ejecutó, mostrar contenido
-        if (document.getElementById("contenido")) {
-          document.getElementById("contenido").style.display = "block";
+        // Si ya se ejecutó checkPassword, mostrar contenido
+        const contenido = document.getElementById("contenido");
+        if (contenido) {
+          contenido.style.display = "block";
         }
+        
+        console.log("Agente inyectado correctamente");
       })();
     `;
     
     iframeWindow.eval(injectedScript);
-    log("✓ Inyectado interceptor en iframe");
+    log("✓ Agente inyectado en iframe local");
   } catch (e) {
-    log("⚠ No se pudo inyectar en iframe (cross-origin). Ingresa la contraseña manualmente en la ventana: " + password);
+    log("⚠ Error al inyectar: " + e.message);
   }
 
-  await sleep(2000);
+  await sleep(1000);
 
   for (currentIndex = 0; currentIndex < data.items.length; currentIndex++) {
     const item = data.items[currentIndex];
@@ -246,95 +256,156 @@ function sleep(ms) {
 // =========================
 
 async function inyectarEnSistema(item) {
-  // Obtener referencia al iframe
+  // Obtener referencia al iframe (ahora es local, sin restricciones)
   const iframeEl = document.getElementById("bmFrame");
-  const iframeDoc = iframeEl.contentDocument || iframeEl.contentWindow.document;
+  const iframeDoc = iframeEl.contentDocument;
+  const iframeWindow = iframeEl.contentWindow;
+  
+  if (!iframeDoc) {
+    log("❌ No se pudo acceder al documento del iframe");
+    return;
+  }
   
   try {
-    // Intentar llenar el formulario en el iframe
-    
-    // 1. Seleccionar tipo de envase
-    const tipoSelect = iframeDoc.getElementById('tipo');
-    if (tipoSelect) {
-      if (item.tipo === 'valija') {
-        tipoSelect.value = 'valija';
-      } else if (item.tipo === 'discontainer') {
-        tipoSelect.value = 'pallet'; // Mapear discontainer a pallet
-      } else if (item.tipo === 'pieza') {
-        tipoSelect.value = 'piezas';
-      }
-      tipoSelect.dispatchEvent(new Event('change'));
+    // 1. Asegurarse de que el contenido está visible
+    const contenido = iframeDoc.getElementById("contenido");
+    if (contenido) {
+      contenido.style.display = "block";
     }
     
-    // 2. Llenar guía
-    const guiaInput = iframeDoc.getElementById('guia');
+    // 2. Rellenar la guía
+    const guiaInput = iframeDoc.getElementById("guia");
     if (guiaInput) {
-      guiaInput.value = item.guia || '810-5066-0000';
+      guiaInput.value = data.guia;
+      guiaInput.dispatchEvent(new Event("input", { bubbles: true }));
     }
     
-    // 3. Según el tipo, llenar los campos correspondientes
-    if (item.tipo === 'valija') {
-      const numValijaInput = iframeDoc.querySelector('input[name="numValija"]');
-      const pesoInput = iframeDoc.querySelector('input[name="pesoValija"]');
-      const warehouseInput = iframeDoc.querySelector('input[name="warehouse"]');
-      const inicialesInput = iframeDoc.getElementById('inicialesValija');
-      
-      if (numValijaInput) numValijaInput.value = item.consecutivo;
-      if (pesoInput) pesoInput.value = item.peso;
-      if (warehouseInput) warehouseInput.value = item.warehouse_qty;
-      if (inicialesInput) inicialesInput.value = item.iniciales;
-      
-      log("→ Valija: " + item.consecutivo);
-      
-    } else if (item.tipo === 'discontainer') {
-      const numPalletInput = iframeDoc.querySelector('input[name="numPallet"]');
-      const pesoInput = iframeDoc.querySelector('input[name="peso"]');
-      const largInput = iframeDoc.querySelector('input[name="largo"]');
-      const anchInput = iframeDoc.querySelector('input[name="ancho"]');
-      const alturaInput = iframeDoc.querySelector('input[name="altura"]');
-      const warehouseInput = iframeDoc.querySelector('input[name="warehouse_pallet"]');
-      
-      if (numPalletInput) numPalletInput.value = item.consecutivo;
-      if (pesoInput) pesoInput.value = item.peso;
-      
-      // Parsear medidas "58x42x45"
-      const [largo, ancho, altura] = item.medidas.split('x');
-      if (largInput) largInput.value = largo;
-      if (anchInput) anchInput.value = ancho;
-      if (alturaInput) alturaInput.value = altura;
-      if (warehouseInput) warehouseInput.value = item.warehouse_qty;
-      
-      log("→ Discontainer: " + item.consecutivo + " (medidas: " + item.medidas + ")");
-      
-    } else if (item.tipo === 'pieza') {
-      const numPalletInput = iframeDoc.querySelector('input[name="numPallet"]');
-      const pesoInput = iframeDoc.querySelector('input[name="peso"]');
-      const largInput = iframeDoc.querySelector('input[name="largo"]');
-      const anchInput = iframeDoc.querySelector('input[name="ancho"]');
-      const alturaInput = iframeDoc.querySelector('input[name="altura"]');
-      const warehouseInput = iframeDoc.querySelector('input[name="warehouse_pallet"]');
-      
-      if (numPalletInput) numPalletInput.value = item.consecutivo;
-      if (pesoInput) pesoInput.value = item.peso;
-      
-      // Parsear medidas "85x20x8"
-      const [largo, ancho, altura] = item.medidas.split('x');
-      if (largInput) largInput.value = largo;
-      if (anchInput) anchInput.value = ancho;
-      if (alturaInput) alturaInput.value = altura;
-      if (warehouseInput) warehouseInput.value = item.warehouse_qty;
-      
-      log("→ Pieza: " + item.consecutivo + " (medidas: " + item.medidas + ")");
+    // 3. Seleccionar tipo de envase
+    const tipoSelect = iframeDoc.getElementById("tipo");
+    if (tipoSelect) {
+      if (item.tipo === "valija") {
+        tipoSelect.value = "valija";
+      } else if (item.tipo === "discontainer") {
+        tipoSelect.value = "pallet";
+      } else if (item.tipo === "pieza") {
+        tipoSelect.value = "piezas";
+      }
+      tipoSelect.dispatchEvent(new Event("change", { bubbles: true }));
     }
     
-    // 4. Hacer clic en enviar (si es posible)
-    const submitBtn = iframeDoc.querySelector('button[type="submit"]');
+    await sleep(300); // Esperar a que se actualicen los campos
+    
+    // 4. Rellenar según el tipo
+    if (item.tipo === "valija") {
+      const numValijaInput = iframeDoc.querySelector("input[name='numValija']");
+      const pesoInput = iframeDoc.querySelector("input[name='pesoValija']");
+      const selloInput = iframeDoc.querySelector("input[name='sello']");
+      const warehouseInput = iframeDoc.querySelector("input[name='warehouse']");
+      const inicialesInput = iframeDoc.getElementById("inicialesValija");
+      
+      if (numValijaInput) {
+        numValijaInput.value = item.consecutivo;
+        numValijaInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (pesoInput) {
+        pesoInput.value = item.peso;
+        pesoInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (warehouseInput) {
+        warehouseInput.value = item.warehouse_qty;
+        warehouseInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (inicialesInput) {
+        inicialesInput.value = item.iniciales;
+        inicialesInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      
+      log("✓ Valija " + item.consecutivo + " inyectada");
+      
+    } else if (item.tipo === "discontainer") {
+      const numPalletInput = iframeDoc.querySelector("input[name='numPallet']");
+      const pesoInput = iframeDoc.querySelector("input[name='peso']");
+      const largoInput = iframeDoc.querySelector("input[name='largo']");
+      const anchoInput = iframeDoc.querySelector("input[name='ancho']");
+      const alturaInput = iframeDoc.querySelector("input[name='altura']");
+      const warehouseInput = iframeDoc.querySelector("input[name='warehouse_pallet']");
+      
+      const [largo, ancho, altura] = item.medidas.split("x");
+      
+      if (numPalletInput) {
+        numPalletInput.value = item.consecutivo;
+        numPalletInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (pesoInput) {
+        pesoInput.value = item.peso;
+        pesoInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (largoInput) {
+        largoInput.value = largo;
+        largoInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (anchoInput) {
+        anchoInput.value = ancho;
+        anchoInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (alturaInput) {
+        alturaInput.value = altura;
+        alturaInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (warehouseInput) {
+        warehouseInput.value = item.warehouse_qty;
+        warehouseInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      
+      log("✓ Discontainer " + item.consecutivo + " inyectado (medidas: " + item.medidas + ")");
+      
+    } else if (item.tipo === "pieza") {
+      const numPalletInput = iframeDoc.querySelector("input[name='numPallet']");
+      const pesoInput = iframeDoc.querySelector("input[name='peso']");
+      const largoInput = iframeDoc.querySelector("input[name='largo']");
+      const anchoInput = iframeDoc.querySelector("input[name='ancho']");
+      const alturaInput = iframeDoc.querySelector("input[name='altura']");
+      const warehouseInput = iframeDoc.querySelector("input[name='warehouse_pallet']");
+      
+      const [largo, ancho, altura] = item.medidas.split("x");
+      
+      if (numPalletInput) {
+        numPalletInput.value = item.consecutivo;
+        numPalletInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (pesoInput) {
+        pesoInput.value = item.peso;
+        pesoInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (largoInput) {
+        largoInput.value = largo;
+        largoInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (anchoInput) {
+        anchoInput.value = ancho;
+        anchoInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (alturaInput) {
+        alturaInput.value = altura;
+        alturaInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (warehouseInput) {
+        warehouseInput.value = item.warehouse_qty;
+        warehouseInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      
+      log("✓ Pieza " + item.consecutivo + " inyectada (medidas: " + item.medidas + ")");
+    }
+    
+    // 5. Hacer clic en enviar
+    const submitBtn = iframeDoc.querySelector("form button[type='submit']");
     if (submitBtn) {
+      await sleep(200);
       submitBtn.click();
     }
     
   } catch (e) {
-    log("⚠ Error al inyectar en iframe: " + e.message);
+    log("❌ Error al inyectar: " + e.message);
   }
 }
 </script>
