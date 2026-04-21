@@ -22,7 +22,8 @@
 
 <div class="status">
   <span class="badge">Guía fija:</span> 810-5066-0000<br>
-  <span class="badge">Total registros:</span> <span id="totalItems">0</span>
+  <span class="badge">Total registros:</span> <span id="totalItems">0</span><br>
+  <span class="badge">Contraseña:</span> <strong>BMCARGOS</strong>
 </div>
 
 <button onclick="startAgent()">Iniciar agente</button>
@@ -161,7 +162,6 @@ async function startAgent() {
   log("Total de registros: " + data.items.length);
 
   // Abre tu sistema en una nueva pestaña
-  // ⚠ CAMBIA ESTA URL POR LA DE TU SISTEMA REAL
   winRef = window.open("https://luiso50.github.io/BM-Cargos/BM%20Cargos.html", "_blank");
 
   if (!winRef) {
@@ -171,6 +171,27 @@ async function startAgent() {
 
   log("Esperando que cargue el sistema (5s)...");
   await sleep(5000);
+
+  // Intentar inyectar script que maneje el prompt automáticamente
+  try {
+    const script = `
+      (function() {
+        const originalPrompt = window.prompt;
+        window.prompt = function(msg) {
+          if (msg && msg.includes("contraseña") || msg && msg.includes("password")) {
+            return "BMCARGOS";
+          }
+          return originalPrompt(msg);
+        };
+      })();
+    `;
+    winRef.eval(script);
+    log("✓ Inyectado manejador de contraseña");
+  } catch (e) {
+    log("⚠ No se pudo inyectar contraseña automática (cross-origin). Ingresa manualmente: BMCARGOS");
+  }
+
+  await sleep(2000);
 
   for (currentIndex = 0; currentIndex < data.items.length; currentIndex++) {
     const item = data.items[currentIndex];
