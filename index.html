@@ -316,7 +316,7 @@ async function inyectarEnSistema(item) {
         warehouseInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       if (inicialesInput) {
-        inicialesInput.value = item.iniciales;
+        inicialesInput.value = item.iniciales.toUpperCase();
         inicialesInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       
