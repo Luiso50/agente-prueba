@@ -21,9 +21,13 @@
 </p>
 
 <div class="status">
-  <span class="badge">Guía fija:</span> 810-5066-0000<br>
   <span class="badge">Total registros:</span> <span id="totalItems">0</span><br>
   <span class="badge">Contraseña por defecto:</span> <strong>BMCARGOS</strong>
+</div>
+
+<div style="margin: 15px 0; padding: 10px; background: #f0f0f0; border-radius: 4px;">
+  <label for="guiaInput" style="font-weight: bold;">Número de Guía:</label><br>
+  <input type="text" id="guiaInput" value="810-5066-0000" style="padding: 5px; margin: 5px 0; width: 200px; font-size: 14px;">
 </div>
 
 <div style="margin: 15px 0; padding: 10px; background: #f0f0f0; border-radius: 4px;">
@@ -99,48 +103,48 @@ const data = {
     { "tipo": "valija", "consecutivo": 1340039, "peso": 28, "warehouse_qty": 16, "iniciales": "PD" },
 
     /* 20 DISCONTAINER: consecutivo 1340040–1340059, medidas 58x42x45 */
-    { "tipo": "discontainer", "consecutivo": 1340040, "medidas": "58x42x45", "warehouse_qty": 150, "peso": 200, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340041, "medidas": "58x42x45", "warehouse_qty": 160, "peso": 201, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340042, "medidas": "58x42x45", "warehouse_qty": 170, "peso": 202, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340043, "medidas": "58x42x45", "warehouse_qty": 180, "peso": 203, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340044, "medidas": "58x42x45", "warehouse_qty": 190, "peso": 204, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340045, "medidas": "58x42x45", "warehouse_qty": 200, "peso": 205, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340046, "medidas": "58x42x45", "warehouse_qty": 210, "peso": 206, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340047, "medidas": "58x42x45", "warehouse_qty": 220, "peso": 207, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340048, "medidas": "58x42x45", "warehouse_qty": 230, "peso": 208, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340049, "medidas": "58x42x45", "warehouse_qty": 240, "peso": 209, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340050, "medidas": "58x42x45", "warehouse_qty": 250, "peso": 210, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340051, "medidas": "58x42x45", "warehouse_qty": 260, "peso": 211, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340052, "medidas": "58x42x45", "warehouse_qty": 270, "peso": 212, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340053, "medidas": "58x42x45", "warehouse_qty": 280, "peso": 213, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340054, "medidas": "58x42x45", "warehouse_qty": 290, "peso": 214, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340055, "medidas": "58x42x45", "warehouse_qty": 300, "peso": 215, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340056, "medidas": "58x42x45", "warehouse_qty": 320, "peso": 216, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340057, "medidas": "58x42x45", "warehouse_qty": 340, "peso": 217, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340058, "medidas": "58x42x45", "warehouse_qty": 360, "peso": 218, "piezas": 1 },
-    { "tipo": "discontainer", "consecutivo": 1340059, "medidas": "58x42x45", "warehouse_qty": 380, "peso": 219, "piezas": 1 },
+    { "tipo": "discontainer", "consecutivo": 1340040, "medidas": "58x42x45", "warehouse_qty": 150, "peso": 200, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340041, "medidas": "58x42x45", "warehouse_qty": 160, "peso": 201, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340042, "medidas": "58x42x45", "warehouse_qty": 170, "peso": 202, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340043, "medidas": "58x42x45", "warehouse_qty": 180, "peso": 203, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340044, "medidas": "58x42x45", "warehouse_qty": 190, "peso": 204, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340045, "medidas": "58x42x45", "warehouse_qty": 200, "peso": 205, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340046, "medidas": "58x42x45", "warehouse_qty": 210, "peso": 206, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340047, "medidas": "58x42x45", "warehouse_qty": 220, "peso": 207, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340048, "medidas": "58x42x45", "warehouse_qty": 230, "peso": 208, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340049, "medidas": "58x42x45", "warehouse_qty": 240, "peso": 209, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340050, "medidas": "58x42x45", "warehouse_qty": 250, "peso": 210, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340051, "medidas": "58x42x45", "warehouse_qty": 260, "peso": 211, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340052, "medidas": "58x42x45", "warehouse_qty": 270, "peso": 212, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340053, "medidas": "58x42x45", "warehouse_qty": 280, "peso": 213, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340054, "medidas": "58x42x45", "warehouse_qty": 290, "peso": 214, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340055, "medidas": "58x42x45", "warehouse_qty": 300, "peso": 215, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340056, "medidas": "58x42x45", "warehouse_qty": 320, "peso": 216, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340057, "medidas": "58x42x45", "warehouse_qty": 340, "peso": 217, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340058, "medidas": "58x42x45", "warehouse_qty": 360, "peso": 218, "piezas": 1, "iniciales": "BM" },
+    { "tipo": "discontainer", "consecutivo": 1340059, "medidas": "58x42x45", "warehouse_qty": 380, "peso": 219, "piezas": 1, "iniciales": "BM" },
 
     /* 20 PIEZAS: consecutivo 1340060–1340079, medidas 85x20x8 */
-    { "tipo": "pieza", "consecutivo": 1340060, "medidas": "85x20x8", "warehouse_qty": 150, "peso": 200 },
-    { "tipo": "pieza", "consecutivo": 1340061, "medidas": "85x20x8", "warehouse_qty": 165, "peso": 205 },
-    { "tipo": "pieza", "consecutivo": 1340062, "medidas": "85x20x8", "warehouse_qty": 180, "peso": 210 },
-    { "tipo": "pieza", "consecutivo": 1340063, "medidas": "85x20x8", "warehouse_qty": 195, "peso": 215 },
-    { "tipo": "pieza", "consecutivo": 1340064, "medidas": "85x20x8", "warehouse_qty": 210, "peso": 220 },
-    { "tipo": "pieza", "consecutivo": 1340065, "medidas": "85x20x8", "warehouse_qty": 225, "peso": 225 },
-    { "tipo": "pieza", "consecutivo": 1340066, "medidas": "85x20x8", "warehouse_qty": 240, "peso": 230 },
-    { "tipo": "pieza", "consecutivo": 1340067, "medidas": "85x20x8", "warehouse_qty": 255, "peso": 235 },
-    { "tipo": "pieza", "consecutivo": 1340068, "medidas": "85x20x8", "warehouse_qty": 270, "peso": 240 },
-    { "tipo": "pieza", "consecutivo": 1340069, "medidas": "85x20x8", "warehouse_qty": 285, "peso": 245 },
-    { "tipo": "pieza", "consecutivo": 1340070, "medidas": "85x20x8", "warehouse_qty": 300, "peso": 250 },
-    { "tipo": "pieza", "consecutivo": 1340071, "medidas": "85x20x8", "warehouse_qty": 315, "peso": 255 },
-    { "tipo": "pieza", "consecutivo": 1340072, "medidas": "85x20x8", "warehouse_qty": 330, "peso": 260 },
-    { "tipo": "pieza", "consecutivo": 1340073, "medidas": "85x20x8", "warehouse_qty": 345, "peso": 265 },
-    { "tipo": "pieza", "consecutivo": 1340074, "medidas": "85x20x8", "warehouse_qty": 360, "peso": 270 },
-    { "tipo": "pieza", "consecutivo": 1340075, "medidas": "85x20x8", "warehouse_qty": 375, "peso": 275 },
-    { "tipo": "pieza", "consecutivo": 1340076, "medidas": "85x20x8", "warehouse_qty": 390, "peso": 280 },
-    { "tipo": "pieza", "consecutivo": 1340077, "medidas": "85x20x8", "warehouse_qty": 405, "peso": 285 },
-    { "tipo": "pieza", "consecutivo": 1340078, "medidas": "85x20x8", "warehouse_qty": 420, "peso": 290 },
-    { "tipo": "pieza", "consecutivo": 1340079, "medidas": "85x20x8", "warehouse_qty": 435, "peso": 295 }
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340060, "medidas": "85x20x8", "warehouse_qty": 150, "peso": 200 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340061, "medidas": "85x20x8", "warehouse_qty": 165, "peso": 205 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340062, "medidas": "85x20x8", "warehouse_qty": 180, "peso": 210 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340063, "medidas": "85x20x8", "warehouse_qty": 195, "peso": 215 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340064, "medidas": "85x20x8", "warehouse_qty": 210, "peso": 220 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340065, "medidas": "85x20x8", "warehouse_qty": 225, "peso": 225 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340066, "medidas": "85x20x8", "warehouse_qty": 240, "peso": 230 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340067, "medidas": "85x20x8", "warehouse_qty": 255, "peso": 235 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340068, "medidas": "85x20x8", "warehouse_qty": 270, "peso": 240 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340069, "medidas": "85x20x8", "warehouse_qty": 285, "peso": 245 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340070, "medidas": "85x20x8", "warehouse_qty": 300, "peso": 250 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340071, "medidas": "85x20x8", "warehouse_qty": 315, "peso": 255 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340072, "medidas": "85x20x8", "warehouse_qty": 330, "peso": 260 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340073, "medidas": "85x20x8", "warehouse_qty": 345, "peso": 265 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340074, "medidas": "85x20x8", "warehouse_qty": 360, "peso": 270 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340075, "medidas": "85x20x8", "warehouse_qty": 375, "peso": 275 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340076, "medidas": "85x20x8", "warehouse_qty": 390, "peso": 280 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340077, "medidas": "85x20x8", "warehouse_qty": 405, "peso": 285 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340078, "medidas": "85x20x8", "warehouse_qty": 420, "peso": 290 },
+    { "tipo": "pieza", "iniciales": "PZ", "consecutivo": 1340079, "medidas": "85x20x8", "warehouse_qty": 435, "peso": 295, "iniciales": "PZ" }
   ]
 };
 
@@ -166,6 +170,12 @@ function resumeAgent() {
 }
 
 async function startAgent() {
+  if (window.location.protocol === 'file:') {
+    log("❌ ERROR: El navegador bloquea el acceso al iframe en modo 'archivo local'.");
+    log("👉 Para solucionarlo: Ejecuta 'python server.py' y abre http://localhost:8000");
+    alert("Error de seguridad: Debes usar un servidor local (ejecuta server.py) para que el agente pueda funcionar.");
+    return;
+  }
   const password = document.getElementById("pwdInput").value;
   log("Iniciando agente para guía " + data.guia);
   log("Total de registros: " + data.items.length);
@@ -286,7 +296,7 @@ async function inyectarEnSistema(item) {
       if (item.tipo === "valija") {
         tipoSelect.value = "valija";
       } else if (item.tipo === "discontainer") {
-        tipoSelect.value = "pallet";
+        tipoSelect.value = "dcontainer";
       } else if (item.tipo === "pieza") {
         tipoSelect.value = "piezas";
       }
@@ -316,7 +326,7 @@ async function inyectarEnSistema(item) {
         warehouseInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       if (inicialesInput) {
-        inicialesInput.value = item.iniciales.toUpperCase();
+        inicialesInput.value = (item.iniciales || "BM").toUpperCase();
         inicialesInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       
@@ -358,7 +368,7 @@ async function inyectarEnSistema(item) {
         warehouseInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       if (inicialesInput) {
-        inicialesInput.value = item.iniciales.toUpperCase();
+        inicialesInput.value = (item.iniciales || "BM").toUpperCase();
         inicialesInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       
@@ -400,7 +410,7 @@ async function inyectarEnSistema(item) {
         warehouseInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       if (inicialesInput) {
-        inicialesInput.value = item.iniciales.toUpperCase();
+        inicialesInput.value = (item.iniciales || "BM").toUpperCase();
         inicialesInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       
